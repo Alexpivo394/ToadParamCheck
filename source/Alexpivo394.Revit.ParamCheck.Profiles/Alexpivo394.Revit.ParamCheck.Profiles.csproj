@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <!-- netstandard2.0 — и Revit 2020–2024 (.NET Framework), и Revit 2025+ (.NET 8/10), и сервер ToadFlow на Linux -->
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <PackageId>Alexpivo394.Revit.ParamCheck.Profiles</PackageId>
+        <Description>ParamChecker profiles without the Revit API: check rules, JSON format of the ParamChecker add-in, validation before a run.</Description>
+        <PackageTags>revit;autodesk;loi;bim</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json"/>
+    </ItemGroup>
+
+</Project>

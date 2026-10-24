@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Тесты без Revit API: файлы Core и Reports подключаются ссылками, поэтому проекту не нужен Revit SDK.
+         Это же проверяет, что в Core и Reports нет зависимостей от Revit. -->
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="TUnit"/>
+        <PackageReference Include="Shouldly"/>
+        <PackageReference Include="EPPlus"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\source\Alexpivo394.Revit.ParamCheck.Profiles\Alexpivo394.Revit.ParamCheck.Profiles.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\source\Alexpivo394.Revit.ParamCheck\Core\**\*.cs" Link="Linked\Core\%(RecursiveDir)%(Filename)%(Extension)"/>
+        <Compile Include="..\..\source\Alexpivo394.Revit.ParamCheck\Reports\**\*.cs" Link="Linked\Reports\%(RecursiveDir)%(Filename)%(Extension)"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+jobs:
+  windows:
+    name: windows-2025
+    runs-on: windows-2025
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Cache packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Build.props', 'Directory.Packages.props') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Test
+        run: dotnet test --project tests/Alexpivo394.Revit.ParamCheck.Tests
+
+      - name: Build Revit 2020
+        run: dotnet build source/Alexpivo394.Revit.ParamCheck -c Release.R20
+
+      - name: Build Revit 2027
+        run: dotnet build source/Alexpivo394.Revit.ParamCheck -c Release.R27

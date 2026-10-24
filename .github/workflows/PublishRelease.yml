@@ -1,0 +1,43 @@
+name: Publish release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+  id-token: write   # trusted publishing: GitHub выдаёт OIDC-токен, nuget.org меняет его на временный ключ
+
+jobs:
+  windows:
+    name: windows-2025
+    runs-on: windows-2025
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Cache packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'Directory.Build.props', 'Directory.Packages.props') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: NuGet login
+        id: nuget
+        uses: NuGet/login@v1
+        with:
+          user: Alexpivo394   # профиль nuget.org, владелец пакетов
+
+      - name: Publish release
+        run: dotnet run -c Release -- pack publish
+        working-directory: "build"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOTNET_ENVIRONMENT: ${{ (github.ref_name == 'main' || github.ref_type == 'tag') && 'Production' || 'Development' }}
+          Publish__Version: ${{ github.ref_name }}
+          NuGet__ApiKey: ${{ steps.nuget.outputs.NUGET_API_KEY }}

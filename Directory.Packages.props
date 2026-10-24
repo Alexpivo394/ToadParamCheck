@@ -1,0 +1,61 @@
+<Project>
+
+    <!-- Global NuGet configuration -->
+    <PropertyGroup>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
+        <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    </PropertyGroup>
+
+    <!-- Revit Dependencies -->
+    <ItemGroup>
+        <PackageVersion Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*-*" Condition="$(RevitVersion) != ''"/>
+        <PackageVersion Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*-*" Condition="$(RevitVersion) != ''"/>
+
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2020.4.0" Condition="$(RevitVersion) == '2020'"/>
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2021.4.0" Condition="$(RevitVersion) == '2021'"/>
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2022.4.0" Condition="$(RevitVersion) == '2022'"/>
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2023.4.0" Condition="$(RevitVersion) == '2023'"/>
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2024.3.0" Condition="$(RevitVersion) == '2024'"/>
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2025.2.0" Condition="$(RevitVersion) == '2025'"/>
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2026.1.0" Condition="$(RevitVersion) == '2026'"/>
+        <PackageVersion Include="Nice3point.Revit.Toolkit" Version="2027.0.0" Condition="$(RevitVersion) == '2027'"/>
+
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2020.5.2" Condition="$(RevitVersion) == '2020'"/>
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2021.5.2" Condition="$(RevitVersion) == '2021'"/>
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2022.5.2" Condition="$(RevitVersion) == '2022'"/>
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2023.5.2" Condition="$(RevitVersion) == '2023'"/>
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2024.3.2" Condition="$(RevitVersion) == '2024'"/>
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2025.2.2" Condition="$(RevitVersion) == '2025'"/>
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2026.1.2" Condition="$(RevitVersion) == '2026'"/>
+        <PackageVersion Include="Nice3point.Revit.Extensions" Version="2027.0.2" Condition="$(RevitVersion) == '2027'"/>
+    </ItemGroup>
+
+    <!-- Core Dependencies -->
+    <ItemGroup>
+        <PackageVersion Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageVersion Include="EPPlus" Version="8.0.1"/>
+        <!-- EPPlus 8.0.1 тянет 9.0.3 с известными уязвимостями (GHSA-2fmv-rv2c-59x7 и др.) — закрепляем исправленные -->
+        <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.21"/>
+        <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.21"/>
+
+        <!-- Testing -->
+        <PackageVersion Include="Shouldly" Version="4.3.0"/>
+        <PackageVersion Include="TUnit" Version="1.72.10"/>
+
+        <!-- Build Automation -->
+        <PackageVersion Include="Sourcy.DotNet" Version="1.1.1"/>
+        <PackageVersion Include="ModularPipelines" Version="3.2.8"/>
+        <PackageVersion Include="ModularPipelines.Git" Version="3.2.8"/>
+        <PackageVersion Include="ModularPipelines.GitHub" Version="3.2.8"/>
+        <PackageVersion Include="ModularPipelines.DotNet" Version="3.2.8"/>
+        <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52"/>
+        <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0"/>
+    </ItemGroup>
+
+    <!-- Development Dependencies -->
+    <ItemGroup>
+        <GlobalPackageReference Include="Polyfill" Version="10.10.0"/>
+    </ItemGroup>
+
+</Project>

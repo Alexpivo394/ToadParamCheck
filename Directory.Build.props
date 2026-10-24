@@ -1,0 +1,29 @@
+<Project>
+
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>true</ImplicitUsings>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    </PropertyGroup>
+
+    <!-- Package metadata shared by both libraries -->
+    <PropertyGroup>
+        <Authors>Alexpivo394</Authors>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/Alexpivo394/ToadParamCheck</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Alexpivo394/ToadParamCheck</PackageProjectUrl>
+        <PackageIcon>images\PackageIcon.png</PackageIcon>
+        <PackageLicenseFile>License.md</PackageLicenseFile>
+        <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory).nuget\PackageIcon.png" PackagePath="images\" Pack="true" Visible="false"/>
+        <None Include="$(MSBuildThisFileDirectory)License.md" PackagePath="" Pack="true" Visible="false"/>
+        <None Include="$(MSBuildThisFileDirectory)Readme.md" PackagePath="" Pack="true" Visible="false"/>
+    </ItemGroup>
+
+</Project>
