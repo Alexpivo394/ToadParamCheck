@@ -63,6 +63,22 @@ public static class ProfileSerializer
         }
     }
 
+    /// <summary>
+    ///     Отпечаток правил профиля — 16 шестнадцатеричных знаков. Меняется, только когда меняются правила: имя профиля, модели,
+    ///     вид и рабочие наборы на него не влияют. По нему аналитика отмечает, что проверки до и после правки профиля не сравнимы.
+    /// </summary>
+    public static string Fingerprint(CheckProfile profile)
+    {
+        var rules = JsonConvert.SerializeObject(profile.Rules, Formatting.None, new JsonSerializerSettings
+        {
+            Converters = [new StringEnumConverter()],
+            NullValueHandling = NullValueHandling.Ignore
+        });
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        var hash = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(rules));
+        return string.Concat(hash.Take(8).Select(b => b.ToString("x2")));
+    }
+
     /// <summary>Одно правило в JSON — для копирования через буфер обмена.</summary>
     public static string SerializeRule(CheckRule rule) =>
         JsonConvert.SerializeObject(new JObject { ["ParamCheckerRule"] = JObject.FromObject(rule, Serializer) }, Settings);
