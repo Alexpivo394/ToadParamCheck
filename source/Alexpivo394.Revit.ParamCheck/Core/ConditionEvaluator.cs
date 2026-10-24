@@ -14,14 +14,14 @@ public static class ConditionEvaluator
     {
         SelectionMode.CategoriesOnly => categoryMatches,
         SelectionMode.ParametersOnly => Matches(filter, read),
-        SelectionMode.CategoriesOrParameters => categoryMatches || (Conditions.HasConditions(filter) && Matches(filter, read)),
+        SelectionMode.CategoriesOrParameters => categoryMatches || (ConditionRules.HasConditions(filter) && Matches(filter, read)),
         _ => categoryMatches && Matches(filter, read)
     };
 
     /// <summary>Условия верхнего уровня, связанные логикой фильтра. Без условий подходит любой элемент.</summary>
     public static bool Matches(RuleFilter filter, Func<string, ParamValue> read)
     {
-        var conditions = filter.Conditions.Where(Conditions.IsComplete).ToList();
+        var conditions = filter.Conditions.Where(ConditionRules.IsComplete).ToList();
         if (conditions.Count == 0) return true;
 
         return filter.Logic == ConditionLogic.Or
@@ -32,7 +32,7 @@ public static class ConditionEvaluator
     /// <summary>Условие или группа условий; группа — все её условия через «И».</summary>
     public static bool Matches(Condition condition, Func<string, ParamValue> read)
     {
-        if (condition.IsGroup) return condition.Group!.Where(Conditions.IsComplete).All(child => Matches(child, read));
+        if (condition.IsGroup) return condition.Group!.Where(ConditionRules.IsComplete).All(child => Matches(child, read));
 
         var value = read(condition.Parameter!.Trim());
         var expected = (condition.Value ?? "").Trim();

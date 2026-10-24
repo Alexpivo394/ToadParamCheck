@@ -36,7 +36,7 @@ public sealed class ModelInspector(RevitApplication application)
         catch (Exception exception) when (progress.ShouldAbort || exception is OperationCanceledException)
         {
             // Revit прервал открытие по нашей просьбе или модель бросили посреди проверки — это решение пользователя.
-            log.Step(name, "проверка прервана");
+            log.Step(name, "проверка прервана по просьбе пользователя");
             return new ModelOutcome(profile.Name, name, path, ModelStatus.Skipped, stopwatch.Elapsed);
         }
         catch (CheckException exception)

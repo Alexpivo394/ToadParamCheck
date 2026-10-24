@@ -46,9 +46,9 @@ public static class RunValidator
             var filter = rule.Filter;
             if (filter.Mode is SelectionMode.CategoriesOnly or SelectionMode.CategoriesAndParameters && filter.Categories.Count == 0)
                 problems.Add($"{ruleName}: не выбраны категории.");
-            if (filter.Mode == SelectionMode.ParametersOnly && !Conditions.HasConditions(filter))
+            if (filter.Mode == SelectionMode.ParametersOnly && !ConditionRules.HasConditions(filter))
                 problems.Add($"{ruleName}: отбор только по условиям, но условий нет.");
-            if (filter.Mode == SelectionMode.CategoriesOrParameters && filter.Categories.Count == 0 && !Conditions.HasConditions(filter))
+            if (filter.Mode == SelectionMode.CategoriesOrParameters && filter.Categories.Count == 0 && !ConditionRules.HasConditions(filter))
                 problems.Add($"{ruleName}: нет ни категорий, ни условий.");
         }
 

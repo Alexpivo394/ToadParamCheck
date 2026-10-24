@@ -1,7 +1,7 @@
 namespace Alexpivo394.Revit.ParamCheck.Profiles;
 
 /// <summary>Что в условиях отбора считается дописанным — общее для проверки модели, редакторов и проверки перед запуском.</summary>
-public static class Conditions
+public static class ConditionRules
 {
     /// <summary>
     ///     В фильтре есть хоть одно дописанное условие. Без условий «категории ИЛИ условия» — это только категории:
