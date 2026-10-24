@@ -16,11 +16,6 @@
         <PackageTags>revit;autodesk;loi;bim;parameters</PackageTags>
     </PropertyGroup>
 
-    <!-- Версия пакета профилей в зависимостях: сборка задаёт её отдельно от {год}.{версия} этого пакета -->
-    <PropertyGroup>
-        <ProfilesVersion Condition="'$(ProfilesVersion)' == ''">0.0.0-dev</ProfilesVersion>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Nice3point.Revit.Toolkit"/>
         <PackageReference Include="Nice3point.Revit.Extensions"/>
@@ -30,10 +25,11 @@
         <PackageReference Include="Newtonsoft.Json"/>
     </ItemGroup>
 
+    <!-- Пакет профилей в зависимостях — версии без года: сборка передаёт её в ProfilesVersion (см. проект профилей) -->
     <ItemGroup>
         <ProjectReference Include="..\Alexpivo394.Revit.ParamCheck.Profiles\Alexpivo394.Revit.ParamCheck.Profiles.csproj"
-                          GlobalPropertiesToRemove="Version;RevitVersion;Configuration"
-                          AdditionalProperties="Version=$(ProfilesVersion);Configuration=$(Configuration.Split('.')[0])"/>
+                          GlobalPropertiesToRemove="RevitVersion"
+                          AdditionalProperties="Configuration=$(Configuration.Split('.')[0])"/>
     </ItemGroup>
 
 </Project>

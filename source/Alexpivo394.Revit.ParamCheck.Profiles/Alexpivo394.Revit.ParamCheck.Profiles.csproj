@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="Version">
 
     <PropertyGroup>
         <!-- netstandard2.0 — и Revit 2020–2024 (.NET Framework), и Revit 2025+ (.NET 8/10), и сервер ToadFlow на Linux -->
@@ -7,6 +7,12 @@
         <PackageId>Alexpivo394.Revit.ParamCheck.Profiles</PackageId>
         <Description>ParamChecker profiles without the Revit API: check rules, JSON format of the ParamChecker add-in, validation before a run.</Description>
         <PackageTags>revit;autodesk;loi;bim</PackageTags>
+    </PropertyGroup>
+
+    <!-- Revit-пакет пакуется с Version={год}.{версия}, и это глобальное свойство доходит сюда. Зависимость на этот пакет
+         должна быть без года: сборка передаёт его версию в ProfilesVersion, а Version здесь локальное и перекрывается. -->
+    <PropertyGroup Condition="'$(ProfilesVersion)' != ''">
+        <Version>$(ProfilesVersion)</Version>
     </PropertyGroup>
 
     <ItemGroup>
