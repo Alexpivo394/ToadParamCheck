@@ -15,11 +15,14 @@ public sealed class CategoryService
         foreach (Category category in document.Settings.Categories)
         {
             var id = RevitIds.Value(category.Id);
-            if (!category.AllowsBoundParameters || id >= 0 || !Enum.IsDefined(typeof(BuiltInCategory), (int)id)) continue;
+            if (!category.AllowsBoundParameters || id >= 0) continue;
+            // Значение — само перечисление: с Revit 2024 его базовый тип long, до того — int, а IsDefined требует точный тип.
+            var builtIn = (BuiltInCategory)id;
+            if (!Enum.IsDefined(typeof(BuiltInCategory), builtIn)) continue;
             // Аналитические модели и служебное — не то, что проверяют на заполнение.
             if (category.CategoryType is not (CategoryType.Model or CategoryType.Annotation)) continue;
 
-            var key = ((BuiltInCategory)(int)id).ToString();
+            var key = builtIn.ToString();
             _categories[key] = new CategoryInfo(key, category.Name, category.CategoryType == CategoryType.Model);
         }
 
