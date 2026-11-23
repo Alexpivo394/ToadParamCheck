@@ -1,6 +1,5 @@
 using System.IO;
-using OfficeOpenXml;
-using OfficeOpenXml.Table;
+using ClosedXML.Excel;
 using Alexpivo394.Revit.ParamCheck.Core;
 
 namespace Alexpivo394.Revit.ParamCheck.Reports;
@@ -14,6 +13,10 @@ namespace Alexpivo394.Revit.ParamCheck.Reports;
 ///         <item><c>Parameters</c> — параметр правила модели в запуске.</item>
 ///     </list>
 ///     Все таблицы связываются по «Запуск» + «Профиль» + «Модель». Последний запуск модели — максимум «Запуск».
+///     <para>
+///         Книга при каждой записи читается и сохраняется целиком: в ней остаются листы, данные и таблицы, но не
+///         диаграммы, добавленные вручную. Дашборды строятся в отдельном файле, который берёт данные из базы.
+///     </para>
 /// </summary>
 public static class HistoryWriter
 {
@@ -30,8 +33,6 @@ public static class HistoryWriter
 
     private static readonly TimeSpan LockRetry = TimeSpan.FromMilliseconds(500);
 
-    static HistoryWriter() => ExcelPackage.License.SetNonCommercialPersonal("ToadTools");
-
     /// <summary>Дописывает модели запуска в базу; файла нет — создаёт.</summary>
     /// <param name="run">Начало запуска — общее для всех его строк.</param>
     /// <exception cref="IOException">Файл занят, например открыт в Excel.</exception>
@@ -40,11 +41,11 @@ public static class HistoryWriter
         if (outcomes.Count == 0) return;
 
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(filePath))!);
-        using var package = File.Exists(filePath) ? new ExcelPackage(new FileInfo(filePath)) : new ExcelPackage();
+        using var workbook = File.Exists(filePath) ? new XLWorkbook(filePath) : new XLWorkbook();
 
-        var models = new List<object?[]>();
-        var rules = new List<object?[]>();
-        var parameters = new List<object?[]>();
+        var models = new List<XLCellValue[]>();
+        var rules = new List<XLCellValue[]>();
+        var parameters = new List<XLCellValue[]>();
         foreach (var outcome in outcomes)
         {
             var report = outcome.Report;
@@ -61,7 +62,7 @@ public static class HistoryWriter
                     run, outcome.ProfileName, outcome.ModelName, rule.Title, rule.Elements, rule.CompleteElements,
                     rule.Completeness, rule.Values, rule.Filled, rule.Empty, rule.Missing, rule.FillRate
                 ]);
-                parameters.AddRange(rule.Stats.Select(stats => new object?[]
+                parameters.AddRange(rule.Stats.Select(stats => new XLCellValue[]
                 {
                     run, outcome.ProfileName, outcome.ModelName, rule.Title, stats.Name, stats.Total, stats.Filled,
                     stats.Empty, stats.Missing, stats.FillRate
@@ -69,10 +70,10 @@ public static class HistoryWriter
             }
         }
 
-        AppendRows(package, Models, models);
-        AppendRows(package, Rules, rules);
-        AppendRows(package, Parameters, parameters);
-        package.SaveAs(new FileInfo(filePath));
+        AppendRows(workbook, Models, models);
+        AppendRows(workbook, Rules, rules);
+        AppendRows(workbook, Parameters, parameters);
+        workbook.SaveAs(filePath);
     }
 
     /// <summary>
@@ -118,33 +119,40 @@ public static class HistoryWriter
         _ => "Ошибка"
     };
 
-    private static void AppendRows(ExcelPackage package, TableSpec spec, IReadOnlyList<object?[]> rows)
+    private static void AppendRows(XLWorkbook workbook, TableSpec spec, IReadOnlyList<XLCellValue[]> rows)
     {
-        var sheet = package.Workbook.Worksheets[spec.Sheet] ?? package.Workbook.Worksheets.Add(spec.Sheet);
-        var table = sheet.Tables[spec.Table] ?? CreateTable(sheet, spec);
+        var sheet = workbook.Worksheets.TryGetWorksheet(spec.Sheet, out var existing) ? existing : workbook.Worksheets.Add(spec.Sheet);
+        var table = sheet.Tables.FirstOrDefault(t => string.Equals(t.Name, spec.Table, StringComparison.OrdinalIgnoreCase)) ?? CreateTable(sheet, spec);
         if (rows.Count == 0) return;
 
-        // Пустая таблица хранит одну пустую строку данных — её занимает первая новая строка.
-        var empty = table.Address.Rows == 2 && sheet.Cells[table.Address.End.Row, 1].Value is null;
-        var first = empty ? table.Address.End.Row : table.Address.End.Row + 1;
-        var add = empty ? rows.Count - 1 : rows.Count;
-        if (add > 0) table.AddRow(add);
+        var top = table.RangeAddress.FirstAddress;
+        var bottom = table.RangeAddress.LastAddress;
+        var column0 = top.ColumnNumber;
 
-        sheet.Cells[first, 1].LoadFromArrays(rows);
+        // Пустая таблица хранит одну пустую строку данных — её занимает первая новая строка.
+        var empty = bottom.RowNumber - top.RowNumber == 1 && sheet.Cell(bottom.RowNumber, column0).IsEmpty();
+        var first = empty ? bottom.RowNumber : bottom.RowNumber + 1;
         var last = first + rows.Count - 1;
-        for (var column = 1; column <= spec.Columns.Length; column++)
+
+        for (var r = 0; r < rows.Count; r++)
+        for (var c = 0; c < rows[r].Length; c++)
+            sheet.Cell(first + r, column0 + c).Value = rows[r][c];
+
+        table.Resize(sheet.Range(top.RowNumber, column0, last, bottom.ColumnNumber));
+
+        for (var column = 0; column < spec.Columns.Length; column++)
         {
-            var format = Format(spec.Columns[column - 1]);
-            if (format is not null) sheet.Cells[first, column, last, column].Style.Numberformat.Format = format;
+            var format = Format(spec.Columns[column]);
+            if (format is not null) sheet.Range(first, column0 + column, last, column0 + column).Style.NumberFormat.Format = format;
         }
     }
 
-    private static ExcelTable CreateTable(ExcelWorksheet sheet, TableSpec spec)
+    private static IXLTable CreateTable(IXLWorksheet sheet, TableSpec spec)
     {
-        for (var i = 0; i < spec.Columns.Length; i++) sheet.Cells[1, i + 1].Value = spec.Columns[i];
-        var table = sheet.Tables.Add(sheet.Cells[1, 1, 2, spec.Columns.Length], spec.Table);
-        table.TableStyle = TableStyles.Medium2;
-        sheet.View.FreezePanes(2, 1);
+        for (var i = 0; i < spec.Columns.Length; i++) sheet.Cell(1, i + 1).Value = spec.Columns[i];
+        var table = sheet.Range(1, 1, 2, spec.Columns.Length).CreateTable(spec.Table);
+        table.Theme = XLTableTheme.TableStyleMedium2;
+        sheet.SheetView.FreezeRows(1);
         for (var i = 1; i <= spec.Columns.Length; i++) sheet.Column(i).Width = spec.Columns[i - 1] is "Путь" or "Ошибка" ? 50 : 18;
         return table;
     }

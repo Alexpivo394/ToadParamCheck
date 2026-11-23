@@ -1,6 +1,6 @@
 using Alexpivo394.Revit.ParamCheck.Core;
 using Alexpivo394.Revit.ParamCheck.Reports;
-using OfficeOpenXml;
+using ClosedXML.Excel;
 using Shouldly;
 
 namespace Alexpivo394.Revit.ParamCheck.Tests;
@@ -21,8 +21,8 @@ public class SharedHistoryTests
             await Task.WhenAll(Enumerable.Range(1, 6).Select(i =>
                 Task.Run(() => HistoryWriter.AppendShared(path, run, [Outcome($"Модель_{i}")], TimeSpan.FromMinutes(1)))));
 
-            using (var package = new ExcelPackage(new FileInfo(path)))
-                package.Workbook.Worksheets["Модели"].Tables["Models"].Address.Rows.ShouldBe(1 + 6);
+            using (var workbook = new XLWorkbook(path))
+                workbook.Worksheet("Модели").Table("Models").RowCount().ShouldBe(1 + 6);
             File.Exists(path + ".lock").ShouldBeFalse();
         }
         finally

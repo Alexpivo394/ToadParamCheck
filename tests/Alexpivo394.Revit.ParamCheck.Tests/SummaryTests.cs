@@ -2,8 +2,6 @@ using System.Text.Json;
 using Alexpivo394.Revit.ParamCheck.Core;
 using Alexpivo394.Revit.ParamCheck.Profiles;
 using Alexpivo394.Revit.ParamCheck.Summaries;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Shouldly;
 
 namespace Alexpivo394.Revit.ParamCheck.Tests;
@@ -42,14 +40,14 @@ public class SummaryTests
     public void NotChecked_HasNoSummary() =>
         Should.Throw<ArgumentException>(() => CheckSummaries.From(Checked() with { Status = ModelStatus.Failed, Report = null }, "abc"));
 
-    /// <summary>Плагин пишет итог через Newtonsoft, сервер читает System.Text.Json — счётчики доходят, доли считаются заново.</summary>
+    /// <summary>Плагин пишет итог в camelCase, сервер читает его веб-настройками — счётчики доходят, доли считаются заново.</summary>
     [Test]
-    public void Json_FromNewtonsoftToSystemTextJson()
+    public void Json_FromPluginToServer()
     {
-        var json = JsonConvert.SerializeObject(CheckSummaries.From(Checked(), "abc"),
-            new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+        var json = JsonSerializer.Serialize(CheckSummaries.From(Checked(), "abc"),
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
-        var read = System.Text.Json.JsonSerializer.Deserialize<CheckSummary>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        var read = JsonSerializer.Deserialize<CheckSummary>(json, new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
 
         json.ShouldContain("\"fillRate\":0.5");
         read.Rules[0].Parameters[1].Missing.ShouldBe(1);

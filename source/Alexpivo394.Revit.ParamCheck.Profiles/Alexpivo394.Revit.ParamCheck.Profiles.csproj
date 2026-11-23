@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="Version">
 
     <PropertyGroup>
-        <!-- netstandard2.0 — и Revit 2020–2024 (.NET Framework), и Revit 2025+ (.NET 8/10), и сервер ToadFlow на Linux -->
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <!-- netstandard2.0 — Revit 2020–2024 (.NET Framework); net8.0 — Revit 2025+ и сервер ToadFlow на Linux: там System.Text.Json входит в рантайм -->
+        <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
         <IsPackable>true</IsPackable>
         <PackageId>Alexpivo394.Revit.ParamCheck.Profiles</PackageId>
         <Description>ParamChecker profiles without the Revit API: check rules, JSON format of the ParamChecker add-in, validation before a run.</Description>
@@ -15,8 +15,8 @@
         <Version>$(ProfilesVersion)</Version>
     </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json"/>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="System.Text.Json"/>
     </ItemGroup>
 
 </Project>

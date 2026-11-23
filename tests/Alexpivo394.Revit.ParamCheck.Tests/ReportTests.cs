@@ -1,4 +1,4 @@
-using OfficeOpenXml;
+using ClosedXML.Excel;
 using Alexpivo394.Revit.ParamCheck.Core;
 using Alexpivo394.Revit.ParamCheck.Reports;
 using Shouldly;
@@ -70,12 +70,12 @@ public class ReportTests
         {
             ReportWriter.Write(Report(), path, problemsOnly: false).ShouldBe(path);
 
-            using var package = new ExcelPackage(new FileInfo(path));
-            package.Workbook.Worksheets.Select(s => s.Name).ShouldBe(["Сводка", "Воздуховоды", "Воздуховоды (2)"]);
-            var sheet = package.Workbook.Worksheets["Воздуховоды"];
-            sheet.Cells[1, 6].Text.ShouldBe("Марка");
-            sheet.Cells[4, 6].Text.ShouldBe(ReportWriter.MissingText);
-            sheet.Cells[2, 8].GetValue<double>().ShouldBe(1);
+            using var workbook = new XLWorkbook(path);
+            workbook.Worksheets.Select(s => s.Name).ShouldBe(["Сводка", "Воздуховоды", "Воздуховоды (2)"]);
+            var sheet = workbook.Worksheet("Воздуховоды");
+            sheet.Cell(1, 6).GetFormattedString().ShouldBe("Марка");
+            sheet.Cell(4, 6).GetFormattedString().ShouldBe(ReportWriter.MissingText);
+            sheet.Cell(2, 8).GetValue<double>().ShouldBe(1);
         }
         finally
         {
@@ -95,12 +95,11 @@ public class ReportTests
             HistoryWriter.Append(path, new DateTime(2026, 10, 1, 9, 0, 0), [checkedModel, failed]);
             HistoryWriter.Append(path, new DateTime(2026, 10, 2, 9, 0, 0), [checkedModel]);
 
-            using var package = new ExcelPackage(new FileInfo(path));
-            var models = package.Workbook.Worksheets["Модели"].Tables["Models"];
-            models.Address.Rows.ShouldBe(1 + 3);
-            package.Workbook.Worksheets["Модели"].Cells[3, 5].Text.ShouldBe("Ошибка");
-            package.Workbook.Worksheets["Правила"].Tables["Rules"].Address.Rows.ShouldBe(1 + 4);
-            package.Workbook.Worksheets["Параметры"].Tables["Parameters"].Address.Rows.ShouldBe(1 + 6);
+            using var workbook = new XLWorkbook(path);
+            workbook.Worksheet("Модели").Table("Models").RowCount().ShouldBe(1 + 3);
+            workbook.Worksheet("Модели").Cell(3, 5).GetFormattedString().ShouldBe("Ошибка");
+            workbook.Worksheet("Правила").Table("Rules").RowCount().ShouldBe(1 + 4);
+            workbook.Worksheet("Параметры").Table("Parameters").RowCount().ShouldBe(1 + 6);
         }
         finally
         {

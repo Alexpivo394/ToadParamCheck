@@ -29,7 +29,7 @@ The result is an Excel workbook with a summary sheet and one sheet per rule, eac
 | Package | Targets | Revit API | What it does |
 |---|---|---|---|
 | [`Alexpivo394.Revit.ParamCheck`](https://www.nuget.org/packages/Alexpivo394.Revit.ParamCheck) | per Revit year | yes | Checks one model inside the Revit API context and writes the report |
-| [`Alexpivo394.Revit.ParamCheck.Profiles`](https://www.nuget.org/packages/Alexpivo394.Revit.ParamCheck.Profiles) | `netstandard2.0` | no | The rule model, its JSON format, and validation before a run |
+| [`Alexpivo394.Revit.ParamCheck.Profiles`](https://www.nuget.org/packages/Alexpivo394.Revit.ParamCheck.Profiles) | `netstandard2.0`, `net8.0` | no | The rule model, its JSON format, and validation before a run |
 
 The version of `Alexpivo394.Revit.ParamCheck` starts with the Revit year: use `2024.*` for Revit 2024.
 
@@ -101,7 +101,7 @@ HistoryWriter.AppendShared(@"\\nas\reports\LOI.xlsx", runStart, [outcome], wait:
 
 The outcome has a `Status` of `Checked`, `Failed`, or `Skipped`. `RevitFailure` marks a run that died on an internal Revit error, not on the model; a retry in a new Revit process usually passes.
 
-`AppendShared` is safe to call from several machines writing to the same history workbook: a writer waits for the file up to the given time.
+`AppendShared` is safe to call from several machines writing to the same history workbook: a writer waits for the file up to the given time. Each append reads the workbook and saves it whole: sheets, data and tables stay, charts added by hand do not — build dashboards in a separate file that reads the history.
 
 `RevitCatalog.Read` lists the categories and parameter names of a Revit session or a document. A rule editor uses it to offer real names instead of free text.
 

@@ -1,4 +1,4 @@
-<Project Sdk="Nice3point.Revit.Sdk/6.2.2">
+<Project Sdk="Nice3point.Revit.Sdk/6.3.2">
 
     <!-- Fallback Revit version for design-time evaluation; a Debug.Rxx / Release.Rxx build overrides it -->
     <PropertyGroup>
@@ -21,8 +21,7 @@
         <PackageReference Include="Nice3point.Revit.Extensions"/>
         <PackageReference Include="Nice3point.Revit.Api.RevitAPI"/>
         <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI"/>
-        <PackageReference Include="EPPlus"/>
-        <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="ClosedXML"/>
     </ItemGroup>
 
     <!-- Пакет профилей в зависимостях — версии без года: сборка передаёт её в ProfilesVersion (см. проект профилей) -->
